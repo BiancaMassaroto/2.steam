@@ -8,19 +8,41 @@ steam.get("/", (req, res) => {
     res.send("Pagina inicial")
 })
 
-steam.get("/jogos/:id", (req, res) => { // buscar jogo por id
-    id = req.params.id
-    res.send("Você buscou o jogo de id " + id)
+steam.get("/:id", async (req, res) => {
+	try{
+		let query = `
+		SELECT *
+    	FROM games g
+    	JOIN user u ON g.id = u.games
+    	WHERE u.id = ${req.params.id}
+		`
+		let jogoPorId = await connection.connection.promise().query(query)
+		res.status(200).send(jogoPorId)
+	} catch(err) {
+		console.log(err)
+	}
 })
 
-app.get("/users", async (req, res) => {
+steam.get("/jogos", async (req, res) => {
 	try {
-		let result = await connection.query("SELECT * FROM users")
-		res.status(200).send(result.json());
+		let result = await connection.connection.promise().query("SELECT * FROM games")
+		res.status(200).send(result);
 	} catch(err) {
-		res.status(500).send(err.json())
+		console.log(err);
 	}
 });
+
+
+
+steam.post("/tag", async (req, res) => {
+	try {
+		const {tagName} = req.body
+		let tag = await connection.connection.promise().query(`insert into tag (tagName) values (?)`, [tagName])
+		res.status(200).send(tag)
+	} catch (err) {
+		console.log(err)
+	}
+})
 
 steam.listen(3000, () => {
 	console.log("Steam 2.0 rodando na porta 3000.");
