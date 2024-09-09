@@ -32,7 +32,15 @@ steam.get("/jogos", async (req, res) => {
 	}
 });
 
-
+steam.post("/jogos", async (req, res) => {
+	try {
+		const {title, tag} = req.body
+		let jogos = await connection.connection.promise().query(`insert into games (title, tag) values (?, ?)`, [title, tag])
+		res.status(200).send(jogos)
+	} catch (err) {
+		console.log(err)
+	}
+})
 
 steam.post("/tag", async (req, res) => {
 	try {
